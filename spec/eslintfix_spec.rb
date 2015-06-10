@@ -5,45 +5,35 @@ describe EslintFix do
   include SpecHelper
 
   before do
-    @fixture_path = fixture_path(__FILE__)
+    init_fixture(__FILE__)
   end
 
   describe 'initialize' do
-    it 'should accept files as input' do
+    it 'should accept a file as input' do
       # Given
-      files = [
-        @fixture_path + '/i-am-here.js',
-        @fixture_path + '/i-am-also-here.js'
-      ]
+      input = fixture_file('i-am-here.js')
       # When
-      actual = EslintFix.new(*files)
+      actual = EslintFix.new(input)
       # Then
-      actual.files.must_equal files
+      actual.file.must_equal input
     end
 
-    it 'should remove non-existent files' do
+    it 'should not accept non-existent files' do
       # Given
-      files = [
-        @fixture_path + '/i-am-here.js',
-        @fixture_path + '/i-am-not-here.js',
-        @fixture_path + '/i-am-also-here.js'
-      ]
+      input = fixture_file('i-am-not-here.js')
       # When
-      actual = EslintFix.new(*files)
+      actual = EslintFix.new(input)
       # Then
-      actual.files.size.must_equal 2
-      actual.files.wont_include(@fixture_path + '/i-am-not-here.js')
+      actual.file.must_be_nil
     end
 
     it 'should expand filenames' do
       # Given
-      files = [
-        @fixture_path + '/../eslintfix/./i-am-here.js'
-      ]
+      input = fixture_file('../eslintfix/./i-am-here.js')
       # When
-      actual = EslintFix.new(*files)
+      actual = EslintFix.new(input)
       # Then
-      actual.files.must_include(@fixture_path + '/i-am-here.js')
+      actual.file.must_equal fixture_file('i-am-here.js')
     end
   end
 end

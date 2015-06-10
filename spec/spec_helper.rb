@@ -8,9 +8,13 @@ Minitest::Reporters.use! Minitest::Reporters::SpecReporter.new
 
 # Shared helper methods
 module SpecHelper
-  def fixture_path(test_file)
+  def init_fixture(base_file)
     fixture_path = File.expand_path(File.join('.', 'spec', 'fixtures'))
-    test_name = File.basename(test_file).gsub('_spec.rb', '')
-    File.join(fixture_path, test_name)
+    test_name = File.basename(base_file).gsub('_spec.rb', '')
+    @fixture_path = File.join(fixture_path, test_name)
+  end
+
+  def fixture_file(file)
+    File.expand_path(File.join(@fixture_path, file))
   end
 end
