@@ -21,10 +21,8 @@ describe EslintFix do
     it 'should not accept non-existent files' do
       # Given
       input = fixture_file('i-am-not-here.js')
-      # When
-      actual = EslintFix.new(input)
-      # Then
-      actual.file.must_be_nil
+      # When/Then
+      -> { EslintFix.new(input) }.must_raise ArgumentError
     end
 
     it 'should expand filenames' do
