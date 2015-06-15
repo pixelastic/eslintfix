@@ -1,6 +1,7 @@
 require 'json'
 require 'fileutils'
 require 'shellwords'
+require 'awesome_print'
 
 # Try to automatically fix eslint errors of Javascript files
 # Dependencies:
@@ -46,8 +47,9 @@ class EslintFix
   def get_eslint_config(eslintrc)
     known_config = [
       'no-trailing-spaces',
-      'space-in-parens',
-      'quotes'
+      'quotes',
+      'space-before-blocks',
+      'space-in-parens'
     ]
     rules = JSON.parse(File.open(eslintrc).read)['rules']
     config = {}
@@ -81,6 +83,16 @@ class EslintFix
         jscs_config[:disallowSpacesInsideParentheses] = { 'all': true }
       end
     end
+    
+    # Spaces before block
+    if @config.key?(:'space-before-blocks')
+      space_before_blocks = @config[:'space-before-blocks']
+      if space_before_blocks
+        jscs_config[:requireSpaceBeforeBlockStatements] = true
+      else
+        jscs_config[:disallowSpaceBeforeBlockStatements] = true
+      end
+    end
 
     # Execute jscs if need be
     content = fix_jscs(content, jscs_config) if jscs_config.size > 0
@@ -89,7 +101,7 @@ class EslintFix
   end
 
   def fix_no_trailing_spaces(content)
-    content.each_line.map(&:rstrip).join("\n") + "\n"
+    content.each_line.map { |line| line.chomp.rstrip }.join("\n") + "\n"
   end
 
   def fix_quotes(content, quotes)
@@ -98,7 +110,7 @@ class EslintFix
     converter = 'to-double-quotes' if quotes == 'double'
     converter = 'to-single-quotes' if quotes == 'single'
     return content unless converter
-    `#{converter} #{content.shellescape}`
+    `echo #{content.shellescape} | #{converter}`.strip + "\n"
   end
 
   def fix_jscs(content, config)
