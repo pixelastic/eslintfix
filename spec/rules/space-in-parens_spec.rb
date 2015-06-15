@@ -18,5 +18,15 @@ describe EslintFix do
       expected = File.open(fixture_file('with-spaces.js')).read
       actual.must_equal expected
     end
+    it 'should remove spaces if set to false' do
+      # Given
+      @instance = EslintFix.new(fixture_file('with-spaces.js'))
+      @instance.add_config('space-in-parens', false)
+      # When
+      actual = @instance.fix
+      # Then
+      expected = File.open(fixture_file('without-spaces.js')).read
+      actual.must_equal expected
+    end
   end
 end

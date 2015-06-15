@@ -30,6 +30,9 @@ class EslintFix
     if @config['space-in-parens'] == true
       add_jscs_config('requireSpacesInsideParentheses', 'all': true)
     end
+    if @config['space-in-parens'] == false
+      add_jscs_config('disallowSpacesInsideParentheses', 'all': true)
+    end
 
     # Execute jscs if need be
     fix_jscs if @config_jscs.size > 0
