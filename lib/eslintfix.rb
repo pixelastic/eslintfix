@@ -47,6 +47,7 @@ class EslintFix
   def get_eslint_config(eslintrc)
     known_config = [
       'no-trailing-spaces',
+      'no-multi-spaces',
       'quotes',
       'space-before-blocks',
       'space-in-parens'
@@ -83,7 +84,7 @@ class EslintFix
         jscs_config[:disallowSpacesInsideParentheses] = { 'all': true }
       end
     end
-    
+
     # Spaces before block
     if @config.key?(:'space-before-blocks')
       space_before_blocks = @config[:'space-before-blocks']
@@ -92,6 +93,11 @@ class EslintFix
       else
         jscs_config[:disallowSpaceBeforeBlockStatements] = true
       end
+    end
+
+    # Multi spaces
+    if @config.key?(:'no-multi-spaces') && @config[:'no-multi-spaces']
+      jscs_config[:disallowMultipleSpaces] = true
     end
 
     # Execute jscs if need be
@@ -133,14 +139,6 @@ class EslintFix
     `jscs --config #{tmp_config} --fix #{tmp_file}`
     File.open(tmp_file).read
   end
-
-  #   "requireSpaceBeforeBlockStatements": true,
-  #     "requireSpaceAfterObjectKeys": true
-  #
-  # Accepter avec --config le fichier eslintrc
-  # Sinon prendre celui qui est présent
-  #
-  # Output dans le terminal le résultat
 
   def run
     puts fix
