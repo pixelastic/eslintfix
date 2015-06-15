@@ -1,7 +1,11 @@
 require 'json'
 require 'fileutils'
+require 'shellwords'
 
 # Try to automatically fix eslint errors of Javascript files
+# Dependencies:
+# - jscs
+# - to-single-quotes / to-double-quotes
 class EslintFix
   attr_reader :file
   attr_accessor :config
@@ -29,10 +33,6 @@ class EslintFix
     @config = get_eslint_config(eslintrc)
   end
 
-  def add_config(key, value)
-    @config[key] = value
-  end
-
   def get_eslintrc(file)
     dirname = File.dirname(file)
     return false if dirname == file
@@ -46,24 +46,35 @@ class EslintFix
   def get_eslint_config(eslintrc)
     known_config = [
       'no-trailing-spaces',
-      'space-in-parens'
+      'space-in-parens',
+      'quotes'
     ]
-    eslintrc_config = JSON.parse(File.open(eslintrc).read)
-    eslintrc_config['rules'].select { |rule| known_config.include?(rule) }
+    rules = JSON.parse(File.open(eslintrc).read)['rules']
+    config = {}
+    rules.each do |rule, value|
+      next unless known_config.include?(rule)
+      config[rule.to_sym] = value
+    end
+    config
   end
 
   def fix
     jscs_config = {}
-    content = File.open(@file).read
+    content = File.open(@file).read.chomp
 
     # Trailing spaces
-    if @config.key?('no-trailing-spaces')
+    if @config.key?(:'no-trailing-spaces')
       content = fix_no_trailing_spaces(content)
     end
 
+    # Quotes
+    if @config.key?(:quotes)
+      content = fix_quotes(content, @config[:quotes])
+    end
+
     # Spaces in parens
-    if @config.key?('space-in-parens')
-      space_in_parens = @config['space-in-parens']
+    if @config.key?(:'space-in-parens')
+      space_in_parens = @config[:'space-in-parens']
       if space_in_parens
         jscs_config[:requireSpacesInsideParentheses] = { 'all': true }
       else
@@ -74,11 +85,20 @@ class EslintFix
     # Execute jscs if need be
     content = fix_jscs(content, jscs_config) if jscs_config.size > 0
 
-    content
+    content.chomp + "\n"
   end
 
   def fix_no_trailing_spaces(content)
     content.each_line.map(&:rstrip).join("\n") + "\n"
+  end
+
+  def fix_quotes(content, quotes)
+    quotes = quotes[1] if quotes.is_a? Array
+    converter = nil
+    converter = 'to-double-quotes' if quotes == 'double'
+    converter = 'to-single-quotes' if quotes == 'single'
+    return content unless converter
+    `#{converter} #{content.shellescape}`
   end
 
   def fix_jscs(content, config)

@@ -11,7 +11,7 @@ describe EslintFix do
     it 'should add spaces if set to true' do
       # Given
       @instance = EslintFix.new(fixture_file('without-spaces.js'))
-      @instance.add_config('space-in-parens', true)
+      @instance.config = { 'space-in-parens': true }
       # When
       actual = @instance.fix
       # Then
@@ -21,7 +21,7 @@ describe EslintFix do
     it 'should remove spaces if set to false' do
       # Given
       @instance = EslintFix.new(fixture_file('with-spaces.js'))
-      @instance.add_config('space-in-parens', false)
+      @instance.config = { 'space-in-parens': false }
       # When
       actual = @instance.fix
       # Then
