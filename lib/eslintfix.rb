@@ -1,4 +1,5 @@
 require 'json'
+require 'fileutils'
 
 # Try to automatically fix eslint errors of Javascript files
 class EslintFix
@@ -56,13 +57,13 @@ class EslintFix
     content = File.open(@file).read
 
     # Trailing spaces
-    if @config.key?(:'no-trailing-spaces')
+    if @config.key?('no-trailing-spaces')
       content = fix_no_trailing_spaces(content)
     end
 
     # Spaces in parens
-    if @config.key?(:'space-in-parens')
-      space_in_parens = @config[:'space-in-parens']
+    if @config.key?('space-in-parens')
+      space_in_parens = @config['space-in-parens']
       if space_in_parens
         jscs_config[:requireSpacesInsideParentheses] = { 'all': true }
       else
@@ -111,6 +112,5 @@ class EslintFix
 
   def run
     puts fix
-
   end
 end
