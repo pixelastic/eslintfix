@@ -46,6 +46,7 @@ class EslintFix
 
   def get_eslint_config(eslintrc)
     known_config = [
+      'indent',
       'key-spacing',
       'no-multi-spaces',
       'no-trailing-spaces',
@@ -84,6 +85,11 @@ class EslintFix
     # Key spacing
     if @config.key?('key-spacing')
       jscs_config = get_jscs_conf_key_spacing(jscs_config)
+    end
+
+    # Indent
+    if @config.key?('indent')
+      jscs_config = get_jscs_conf_indent(jscs_config)
     end
 
     # Multi spaces
@@ -135,6 +141,25 @@ class EslintFix
         jscs_config[:disallowSpaceBeforeObjectValues] = true
       end
     end
+
+    jscs_config
+  end
+
+  def get_jscs_conf_indent(jscs_config)
+    # http://eslint.org/docs/rules/indent
+    # http://jscs.info/rule/validateIndentation.html
+    indent = @config['indent']
+    indent_value = nil
+
+    # Default eslint indentation is 4 spaces
+    indent_value = 4 if indent.is_a? Integer
+
+    if indent.is_a? Array
+      indent_value = indent[1]
+      indent_value = "\t" if indent_value == 'tab'
+    end
+
+    jscs_config[:validateIndentation] = indent_value
 
     jscs_config
   end
