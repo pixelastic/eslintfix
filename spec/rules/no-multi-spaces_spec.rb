@@ -11,7 +11,7 @@ describe EslintFix do
     it 'should remove useless spaces' do
       # Given
       @instance = EslintFix.new(fixture_file('with-spaces.js'))
-      @instance.config = { 'no-multi-spaces': true }
+      @instance.config = stringify_hash('no-multi-spaces': true)
       # When
       actual = @instance.fix
       # Then

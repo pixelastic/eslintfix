@@ -17,4 +17,8 @@ module SpecHelper
   def fixture_file(file)
     File.expand_path(File.join(@fixture_path, file))
   end
+
+  def stringify_hash(hash)
+    JSON.parse(JSON.generate(hash))
+  end
 end

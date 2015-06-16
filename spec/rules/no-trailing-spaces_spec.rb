@@ -6,7 +6,7 @@ describe EslintFix do
   before do
     init_fixture(__FILE__)
     @instance = EslintFix.new(fixture_file('input.js'))
-    @instance.config = { 'no-trailing-spaces': true }
+    @instance.config = stringify_hash('no-trailing-spaces': true)
   end
 
   describe 'rule no-trailing-spaces' do

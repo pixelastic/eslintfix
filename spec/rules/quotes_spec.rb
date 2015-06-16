@@ -11,7 +11,7 @@ describe EslintFix do
     it 'should use double quotes when set to double' do
       # Given
       @instance = EslintFix.new(fixture_file('single.js'))
-      @instance.config = { 'quotes': 'double' }
+      @instance.config = stringify_hash('quotes': 'double')
       # When
       actual = @instance.fix
       # Then
@@ -21,7 +21,7 @@ describe EslintFix do
     it 'should use single quotes when set to single' do
       # Given
       @instance = EslintFix.new(fixture_file('double.js'))
-      @instance.config = { 'quotes': 'single' }
+      @instance.config = stringify_hash('quotes': 'single')
       # When
       actual = @instance.fix
       # Then

@@ -11,7 +11,7 @@ describe EslintFix do
     it 'should add a space before {} block' do
       # Given
       @instance = EslintFix.new(fixture_file('no-space.js'))
-      @instance.config = { 'space-before-blocks': true }
+      @instance.config = stringify_hash('space-before-blocks': true)
       # When
       actual = @instance.fix
       # Then
@@ -21,7 +21,7 @@ describe EslintFix do
     it 'should remove spaces before {} blocks' do
       # Given
       @instance = EslintFix.new(fixture_file('with-space.js'))
-      @instance.config = { 'space-before-blocks': false }
+      @instance.config = stringify_hash('space-before-blocks': false)
       # When
       actual = @instance.fix
       # Then

@@ -46,19 +46,15 @@ class EslintFix
 
   def get_eslint_config(eslintrc)
     known_config = [
-      'no-trailing-spaces',
+      'key-spacing',
       'no-multi-spaces',
+      'no-trailing-spaces',
       'quotes',
       'space-before-blocks',
       'space-in-parens'
     ]
     rules = JSON.parse(File.open(eslintrc).read)['rules']
-    config = {}
-    rules.each do |rule, value|
-      next unless known_config.include?(rule)
-      config[rule.to_sym] = value
-    end
-    config
+    rules.select! { |rule| known_config.include?(rule) }
   end
 
   def fix
@@ -66,37 +62,32 @@ class EslintFix
     content = File.open(@file).read.chomp
 
     # Trailing spaces
-    if @config.key?(:'no-trailing-spaces')
+    if @config.key?('no-trailing-spaces')
       content = fix_no_trailing_spaces(content)
     end
 
     # Quotes
-    if @config.key?(:quotes)
-      content = fix_quotes(content, @config[:quotes])
+    if @config.key?('quotes')
+      content = fix_quotes(content, @config['quotes'])
     end
 
     # Spaces in parens
-    if @config.key?(:'space-in-parens')
-      space_in_parens = @config[:'space-in-parens']
-      if space_in_parens
-        jscs_config[:requireSpacesInsideParentheses] = { 'all': true }
-      else
-        jscs_config[:disallowSpacesInsideParentheses] = { 'all': true }
-      end
+    if @config.key?('space-in-parens')
+      jscs_config = get_jscs_conf_space_in_parens(jscs_config)
     end
 
     # Spaces before block
-    if @config.key?(:'space-before-blocks')
-      space_before_blocks = @config[:'space-before-blocks']
-      if space_before_blocks
-        jscs_config[:requireSpaceBeforeBlockStatements] = true
-      else
-        jscs_config[:disallowSpaceBeforeBlockStatements] = true
-      end
+    if @config.key?('space-before-blocks')
+      jscs_config = get_jscs_conf_space_before_blocks(jscs_config)
+    end
+
+    # Key spacing
+    if @config.key?('key-spacing')
+      jscs_config = get_jscs_conf_key_spacing(jscs_config)
     end
 
     # Multi spaces
-    if @config.key?(:'no-multi-spaces') && @config[:'no-multi-spaces']
+    if @config.key?('no-multi-spaces') && @config['no-multi-spaces']
       jscs_config[:disallowMultipleSpaces] = true
     end
 
@@ -104,6 +95,48 @@ class EslintFix
     content = fix_jscs(content, jscs_config) if jscs_config.size > 0
 
     content.chomp + "\n"
+  end
+
+  def get_jscs_conf_space_in_parens(jscs_config)
+    space_in_parens = @config['space-in-parens']
+    if space_in_parens
+      jscs_config[:requireSpacesInsideParentheses] = { 'all': true }
+    else
+      jscs_config[:disallowSpacesInsideParentheses] = { 'all': true }
+    end
+    jscs_config
+  end
+
+  def get_jscs_conf_space_before_blocks(jscs_config)
+    space_before_blocks = @config['space-before-blocks']
+    if space_before_blocks
+      jscs_config[:requireSpaceBeforeBlockStatements] = true
+    else
+      jscs_config[:disallowSpaceBeforeBlockStatements] = true
+    end
+    jscs_config
+  end
+
+  def get_jscs_conf_key_spacing(jscs_config)
+    key_spacing = @config['key-spacing'][1]
+
+    if key_spacing.key?('beforeColon')
+      if key_spacing['beforeColon']
+        jscs_config[:requireSpaceAfterObjectKeys] = true
+      else
+        jscs_config[:disallowSpaceAfterObjectKeys] = true
+      end
+    end
+
+    if key_spacing.key?('afterColon')
+      if key_spacing['afterColon']
+        jscs_config[:requireSpaceBeforeObjectValues] = true
+      else
+        jscs_config[:disallowSpaceBeforeObjectValues] = true
+      end
+    end
+
+    jscs_config
   end
 
   def fix_no_trailing_spaces(content)
